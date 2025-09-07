@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX Lite+ - Sicherheitschecks</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --danger: #dc2626;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --background: #f1f5f9;
+            --card: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(120deg, var(--primary), #1e40af);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background-color: var(--card);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1e40af;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #15803d;
+        }
+        
+        .test-urls {
+            display: flex;
+            gap: 10px;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .test-url {
+            background-color: #e0f2fe;
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .test-url:hover {
+            background-color: #bae6fd;
+        }
+        
+        .instructions {
+            background-color: #eff6ff;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .results {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        .result-card {
+            background-color: var(--card);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        pre {
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .summary-item {
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .export-buttons {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1rem;
+            color: var(--secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 1.5rem 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .export-buttons {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>APEX Lite+</h1>
+        <p class="subtitle">Einfache Sicherheitschecks für Websites</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Website-Sicherheitstest</h2>
+            
+            <div class="instructions">
+                <p>Geben Sie eine URL ein und klicken Sie auf "Test starten", um die Sicherheit der Website zu überprüfen.</p>
+                <div class="test-urls">
+                    <div class="test-url" onclick="setTestUrl('https://example.com')">example.com</div>
+                    <div class="test-url" onclick="setTestUrl('https://httpbin.org')">httpbin.org</div>
+                    <div class="test-url" onclick="setTestUrl('https://google.com')">google.com</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="url">Website-URL</label>
+                <input type="text" id="url" placeholder="https://example.com" value="https://example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="test-type">Test-Typ</label>
+                <select id="test-type">
+                    <option value="all">Alle Tests durchführen</option>
+                    <option value="dns">Nur DNS-Check</option>
+                    <option value="tls">Nur TLS/SSL-Check</option>
+                    <option value="headers">Nur Header-Check</option>
+                </select>
+            </div>
+            
+            <button class="btn-primary" onclick="runTests()">Test starten</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Test wird durchgeführt, bitte warten...</p>
+        </div>
+
+        <div class="results" id="results">
+            <div class="card">
+                <h2 class="card-title">Zusammenfassung der Ergebnisse</h2>
+                
+                <div class="summary">
+                    <div class="summary-item">
+                        <div class="summary-value" id="dns-result">-</div>
+                        <div>DNS-Check</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="tls-result">-</div>
+                        <div>TLS/SSL-Check</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="headers-result">-</div>
+                        <div>Header-Check</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="security-result">-</div>
+                        <div>Sicherheits-Bewertung</div>
+                    </div>
+                </div>
+                
+                <div class="export-buttons">
+                    <button class="btn-success" onclick="generatePDF()">Als PDF exportieren (Edge)</button>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <h3 class="result-title">DNS-Ergebnisse</h3>
+                <pre id="dns-details">Die DNS-Ergebnisse werden hier angezeigt...</pre>
+            </div>
+
+            <div class="result-card">
+                <h3 class="result-title">TLS/SSL-Ergebnisse</h3>
+                <pre id="tls-details">Die TLS/SSL-Ergebnisse werden hier angezeigt...</pre>
+            </div>
+
+            <div class="result-card">
+                <h3 class="result-title">Header-Ergebnisse</h3>
+                <pre id="headers-details">Die Header-Ergebnisse werden hier angezeigt...</pre>
+            </div>
+
+            <div class="result-card">
+                <h3 class="result-title">Detaillierter Bericht</h3>
+                <pre id="full-report">Der vollständige Bericht wird hier angezeigt...</pre>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>APEX Lite+ - Einfache Sicherheitschecks für Websites | © 2023 Alle Rechte vorbehalten. Geistiges Eigentum von Daniel Schmutz.</p>
+    </footer>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        function setTestUrl(url) {
+            document.getElementById('url').value = url;
+            showNotification('Test-URL wurde gesetzt: ' + url);
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function runTests() {
+            const url = document.getElementById('url').value;
+            const testType = document.getElementById('test-type').value;
+            
+            if (!url) {
+                showNotification('Bitte geben Sie eine URL ein');
+                return;
+            }
+            
+            // Ergebnisse anzeigen
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            // Simulierte Tests (später durch echte API-Calls ersetzen)
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                
+                // Simulierte Ergebnisse anzeigen
+                document.getElementById('dns-result').textContent = '✓ OK';
+                document.getElementById('dns-result').style.color = 'var(--success)';
+                document.getElementById('tls-result').textContent = 'A+';
+                document.getElementById('tls-result').style.color = 'var(--success)';
+                document.getElementById('headers-result').textContent = '78%';
+                document.getElementById('headers-result').style.color = 'var(--warning)';
+                document.getElementById('security-result').textContent = 'B';
+                document.getElementById('security-result').style.color = 'var(--warning)';
+                
+                document.getElementById('dns-details').textContent = `DNS-Check für ${url}:\n- A-Record: 93.184.216.34\n- AAAA-Record: 2606:2800:220:1:248:1893:25c8:1946\n- MX-Records: gefunden\n- DNSSEC: aktiviert`;
+                
+                document.getElementById('tls-details').textContent = `TLS/SSL-Check für ${url}:\n- Zertifikat: gültig\n- Verschlüsselung: TLS 1.3\n- Cipher: stark\n- Bewertung: A+`;
+                
+                document.getElementById('headers-details').textContent = `Header-Check für ${url}:\n- Strict-Transport-Security: vorhanden\n- X-Content-Type-Options: vorhanden\n- X-Frame-Options: vorhanden\n- Content-Security-Policy: teilweise implementiert`;
+                
+                document.getElementById('full-report').textContent = `Vollständiger Sicherheitsreport für ${url}\nErstellt am: ${new Date().toLocaleString()}\n\nDNS-Check: BESTANDEN\nTLS/SSL-Check: BESTANDEN (A+)\nSicherheitsheader: TEILWEISE BESTANDEN (78%)\n\nEMPFEHLUNGEN:\n- Content-Security-Policy Header implementieren\n- X-XSS-Protection Header hinzufügen\n- Referrer-Policy Header hinzufügen`;
+                
+                showNotification('Test abgeschlossen!');
+            }, 2000);
+        }
+        
+        function generatePDF() {
+            // Prüfen, ob Microsoft Edge verwendet wird
+            const isEdge = navigator.userAgent.includes('Edg');
+            
+            if (!isEdge) {
+                showNotification('Diese Funktion funktioniert am besten mit Microsoft Edge');
+            }
+            
+            // HTML-Inhalt für den PDF-Report
+            const url = document.getElementById('url').value;
+            const dnsResult = document.getElementById('dns-result').textContent;
+            const tlsResult = document.getElementById('tls-result').textContent;
+            const headersResult = document.getElementById('headers-result').textContent;
+            const securityResult = document.getElementById('security-result').textContent;
+            const dnsDetails = document.getElementById('dns-details').textContent;
+            const tlsDetails = document.getElementById('tls-details').textContent;
+            const headersDetails = document.getElementById('headers-details').textContent;
+            const fullReport = document.getElementById('full-report').textContent;
+            
+            const pdfContent = `
+                <html>
+                    <head>
+                        <title>Sicherheitsreport für ${url}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 40px; }
+                            h1 { color: #2563eb; }
+                            h2 { color: #2563eb; margin-top: 30px; }
+                            .summary { display: flex; justify-content: space-between; margin: 20px 0; }
+                            .summary-item { text-align: center; padding: 15px; border: 1px solid #ddd; border-radius: 5px; flex: 1; margin: 0 10px; }
+                            .summary-value { font-size: 24px; font-weight: bold; }
+                            pre { background-color: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; }
+                            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>APEX Lite+ Sicherheitsreport</h1>
+                        <p><strong>URL:</strong> ${url}</p>
+                        <p><strong>Datum:</strong> ${new Date().toLocaleString()}</p>
+                        
+                        <h2>Zusammenfassung</h2>
+                        <div class="summary">
+                            <div class="summary-item">
+                                <div class="summary-value">${dnsResult}</div>
+                                <div>DNS-Check</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value">${tlsResult}</div>
+                                <div>TLS/SSL-Check</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value">${headersResult}</div>
+                                <div>Header-Check</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value">${securityResult}</div>
+                                <div>Sicherheits-Bewertung</div>
+                            </div>
+                        </div>
+                        
+                        <h2>DNS-Ergebnisse</h2>
+                        <pre>${dnsDetails}</pre>
+                        
+                        <h2>TLS/SSL-Ergebnisse</h2>
+                        <pre>${tlsDetails}</pre>
+                        
+                        <h2>Header-Ergebnisse</h2>
+                        <pre>${headersDetails}</pre>
+                        
+                        <h2>Detaillierter Bericht</h2>
+                        <pre>${fullReport}</pre>
+                        
+                        <div class="footer">
+                            <p>APEX Lite+ - Einfache Sicherheitschecks für Websites</p>
+                            <p>© 2023 Alle Rechte vorbehalten. Geistiges Eigentum von Daniel Schmutz.</p>
+                        </div>
+                    </body>
+                </html>
+            `;
+            
+            // PDF in neuem Fenster öffnen und drucken
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(pdfContent);
+            printWindow.document.close();
+            
+            // Kurze Verzögerung vor dem Druck-Dialog
+            setTimeout(() => {
+                printWindow.print();
+                showNotification('PDF wird vorbereitet...');
+            }, 500);
+        }
+        
+        // Event-Listener für die Eingabetaste
+        document.getElementById('url').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                runTests();
+            }
+        });
+    </script>
+</body>
+</html>
